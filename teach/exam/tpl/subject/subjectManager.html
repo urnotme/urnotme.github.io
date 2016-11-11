@@ -1,0 +1,295 @@
+<script>
+	$(function(){
+		//单个添加题目跳转
+		$(".icon_add").off("click");
+		$(".icon_add").on("click",function(){
+			var url="tpl/subject/subjectAdd.html";
+			$(".right").load(url);	
+		});
+		//加载数据，改变样式---type
+		$.post("tpl/data/type.json",function(data){
+			//console.log(data);	
+			data.forEach(function(item,index){
+				$(".chose1").append("<a href='#' name='"+item.name+"'>"+item.realName+"</a>");	
+				//点击当前元素改变样式
+				$(".chose1").children("a").off("click");
+				$(".chose1").children("a").on("click",function(){
+					if(!$(this).hasClass("active3")){
+						//清除所有a标签样式
+						$(".chose1").children("a").removeClass("active3");
+						$(this).addClass("active3");	
+						searchData();
+					}
+				});
+			});
+		});
+		//加载数据，改变样式---department
+		$.post("tpl/data/department.json",function(data){
+			//console.log(data);	
+			data.forEach(function(item,index){
+				$(".chose2").append("<a href='#' name='"+item.name+"'>"+item.realName+"</a>");	
+				//点击当前元素改变样式
+				$(".chose2").children("a").off("click");
+				$(".chose2").children("a").on("click",function(){
+					if(!$(this).hasClass("active3")){
+						//清除所有a标签样式
+						$(".chose2").children("a").removeClass("active3");
+						$(this).addClass("active3");
+						searchData();	
+					}
+				});
+			});
+		});
+		//加载数据，改变样式---level
+		$.post("tpl/data/level.json",function(data){
+			//console.log(data);	
+			data.forEach(function(item,index){
+				$(".chose3").append("<a href='#' name='"+item.name+"'>"+item.realName+"</a>");	
+				//点击当前元素改变样式
+				$(".chose3").children("a").off("click");
+				$(".chose3").children("a").on("click",function(){
+					if(!$(this).hasClass("active3")){
+						//清除所有a标签样式
+						$(".chose3").children("a").removeClass("active3");
+						$(this).addClass("active3");
+						searchData();	
+					}
+				});
+			});
+		});
+		//加载数据，改变样式---topics
+		$.post("tpl/data/topics.json",function(data){
+			//console.log(data);	
+			data.forEach(function(item,index){
+				$(".chose4").append("<a href='#' name='"+item.name+"'>"+item.realName+"</a>");	
+				//点击当前元素改变样式
+				$(".chose4").children("a").off("click");
+				$(".chose4").children("a").on("click",function(){
+					if(!$(this).hasClass("active3")){
+						//清除所有a标签样式
+						$(".chose4").children("a").removeClass("active3");
+						$(this).addClass("active3");	
+						searchData();
+					}
+				});
+			});
+		});
+});
+searchData();
+	//封装筛选方法
+	function searchData(){
+		//声明一个空对象，用来承载用户点击数据值
+		var searchObj={};
+		//拿到用户点击值，放在对象中
+		$(".chose").each(function(index,item){
+			var clickVlaue=$(this).children("a.active3").html();
+			//console.log(clickVlaue);	
+			//console.log(item);
+			var tdHtml=$(item).parent().prev().html();	//获取题型，方向，知识点，难度
+			console.log(tdHtml);
+			switch(tdHtml){
+				case "题型":
+					searchObj["type"]=clickVlaue;
+				break;
+				case "方向":
+					searchObj["department"]=clickVlaue;
+				break;
+				case "知识点":
+					searchObj["level"]=clickVlaue;
+				break;
+				case "难度":
+					searchObj["topics"]=clickVlaue;
+				break;	
+			}
+		});
+		//console.log(searchObj);
+		//从后台请求数据，进行匹配
+		$.post("tpl/data/paper.json",function(data){
+			//console.log(data);	
+			if(searchObj["type"]!=="全部"){
+				var data=data.filter(function(item,index){
+					return searchObj["type"]==item.type;	
+				});
+			}
+			//console.log(data);
+			if(searchObj["department"]!=="全部"){
+				var data=data.filter(function(item,index){
+					return searchObj["department"]==item.department;	
+				});
+			}
+			//console.log(data);
+			if(searchObj["level"]!=="全部"){
+				var data=data.filter(function(item,index){
+					return searchObj["level"]==item.level;	
+				});
+			}
+			//console.log(data);
+			if(searchObj.topics!=="全部"){
+				var data=data.filter(function(item,index){
+					return searchObj["topics"]==item.topics;	
+				});
+			}
+			//console.log(data);
+			//清空div里面的数据
+			$(".Catalogtitwo").each(function(index,item){
+				$(this).html("");
+				$(".Catalogcontentup").eq(index).html("");	
+			});
+			//遍历筛选出来的数据，进行添加
+			data.forEach(function(item,index){
+				var str="";
+				//console.log(item);
+				for(var key in item){
+					switch(key){
+						case "id":str+="题号："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;	
+						case "type":str+="题型："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;
+						case "department":str+="方向："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;
+						case "level":str+="难度："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;	
+						case "topics":str+="知识点："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;
+						case "upPerson":str+="上传人："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;
+					break;	
+						case "from":str+="来源："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;	
+						case "time":str+="次数："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;	
+						case "upTime":str+="时间："+item[key]+"&nbsp;&nbsp;&nbsp;";
+					break;	
+					}
+					// 大的数据框中需要添加两个隐藏数据，在点击显示时在进行显示
+					
+						if(key=="stem"){
+							var p=$("<p></p>");
+							p.html(item[key]);
+							}
+							//console.log(key);//key就是paper中每个属性名
+						if(key=="analysis"){
+							var p=$("<p></p>");
+							p.html(item[key]);
+							p.attr("flag","analysis");
+							}
+						$(".Catalogcontentup").eq(index).append(p);				
+				}
+				$(".Catalogtitwo").eq(index).html(str);
+				//获取到显示答案解析的input，进行显示答案解析
+				//默认隐藏
+				$("p[flag='analysis']").hide();
+				$(".Catalogtitle").children("input").on("change",function(){
+						if($(this).prop("checked")){
+							$("p[flag='analysis']").show();
+							}else{
+								$("p[flag='analysis']").hide();
+							}
+				});
+		//$(".Catalogtitwo").eq(index).html(str);
+			});
+		});
+		
+	}
+	
+</script>
+
+				<div class="editingarea">
+                    <div class="c_flex"><span class="c_flexible"></span></div>
+                	<div class="c_editview">
+                   <div class="c_condition">
+                       <span><select><option>题干</option></select></span>
+                       <span class="pl5 " ><input type="text"></span>
+                       <span class="pl15 pr15 btn_gray ">查找</span>
+                       <span class="icon_add"><em class="icon_r">单个添加题目</em></span>
+                    </div>
+                    <div class="divtable">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="tablea">
+                        	<tr>
+                                <td align="center">题型</td>
+                                <td align="left">
+                                    <div class="chose chose1">
+                                    	<a href="#" class="active3">全部</a>
+                                        <!--
+                                        <a href="#">单选题</a>
+                                        <a href="#">多选题</a>
+                                        <a href="#">简答题</a>
+                                        -->
+                                    </div>
+                                </td>
+                                
+                            </tr>
+                            <tr>
+                                <td align="center">方向</td>
+                                <td align="left">
+                                    <div class="chose chose2">
+                                    	<a href="#" class="active3">全部</a>
+                                        <!--
+                                        <a href="#">WebUI</a>
+                                        <a href="#">JavaEE</a>
+                                        <a href="#">Android</a>
+                                        <a href="#">IOS</a>
+                                        -->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                            	<td align="center">知识点</td>
+                                <td align="left">
+                                    <div class="chose chose3">
+                                    	<a href="#" class="active3">全部</a>
+                                        <!--
+                                        <a href="#">Html</a>
+                                        <a href="#">JavaScript</a>
+                                        <a href="#">CSS</a>
+                                        <a href="#">jQuery</a>
+                                        
+                                        -->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td align="center">难度</td>
+                                <td align="left">
+                                    <div class="chose chose4">
+                                    	<a href="#" class="active3">全部</a>
+                                        <!--
+                                        <a href="#">容易</a>
+                                        <a href="#">中等</a>
+                                        <a href="#">难</a> 
+                                        -->
+                                    </div>
+                                </td>
+                                
+                            </tr>
+                        </table>
+                    </div>
+                       <div class="Catalog">
+                           <div class="Catalog_right">
+                               <div class="Catalogtitle">总计<em>15552</em>道题&nbsp;&nbsp;
+                               <input type="checkbox" /><b>显示答案和解析</b>&nbsp;&nbsp;<div><a href="#" class="Thispage2">本页全部审核通过</a>				
+                               	<!--
+                               	<i>1</i>
+                                <a href="#" class="pageone">前</a>
+                                <a href="#" class="pagetwo">后</a>
+                                -->
+                                </div></div>
+                               <div class="Catalog_rightnei">
+                                   <div class="Catalogtitwo">题号：25544&nbsp;&nbsp;题型：还是得&nbsp;&nbsp;难度：订餐&nbsp;&nbsp;上传人：女性司机&nbsp;&nbsp;来源：才能使得&nbsp;&nbsp;上传时间:220255&nbsp;&nbsp;组卷次数：<em>0</em></div>
+                                   <div class="Catalogcontent">
+                                       <div class="Catalogcontentup">题型</div>
+                                       <div class="Catalogcontentdown"><a href="#">审核通过</a><a href="#">审核不通过</a><a href="#">删除题目</a></div>
+                                   </div>
+                               </div>
+                               <div class="Catalog_rightnei">
+                                   <div class="Catalogtitwo">题号：25544&nbsp;&nbsp;题型：还是得&nbsp;&nbsp;难度：订餐&nbsp;&nbsp;上传人：女性司机&nbsp;&nbsp;来源：才能使得&nbsp;&nbsp;上传时间:220255&nbsp;&nbsp;组卷次数：<em>0</em></div>
+                                   <div class="Catalogcontent">
+                                       <div class="Catalogcontentup">题型</div>
+                                       <div class="Catalogcontentdown"><a href="#">加入试卷</a></div>
+                                   </div>
+                               </div>
+                           </div>
+                           <div class="clear"></div>
+                       </div>
+                    </div>
+                </div>
